@@ -7,8 +7,8 @@
 # - [x] Reorganize CSV file
 # - [x] Read CSV file into data.frame
 # - [x] Calcualte mean and sd for each datapoint 
-# - [ ] Output to CSV file, format tables in excel 
-# - [ ] Plot: time on the x-axis, citrate concentration [OD420] on the y-axis 
+# - [x] Output to CSV file, format tables in excel 
+# - [x] Plot: time on the x-axis, citrate concentration [OD420] on the y-axis 
 
 
 # read in data from .csv file
@@ -34,8 +34,11 @@ for (generation in Generations) {
   }
 }
 
-print("TABLE 1: mean and standard deviation for each generation in each replicant.")
-print(table)
+# write table-1 to csv file
+write.csv(table, "plots/table-1.csv")
+# print("TABLE 1: mean and standard deviation for each generation in each replicant.")
+# print(table)
+
 
 table2 <- data.frame(Generation=character(), mean=numeric(), stddev=numeric())
 
@@ -47,8 +50,9 @@ for (generation in Generations) {
   table2 <- rbind(table2, data.frame(Generation=generation, mean=dpmean, stddev=dpsd))
 }
 
-print("TABLE 2: mean and standard deviation for each generation across all replicants combined.")
-print(table2)
+write.csv(table2, "plots/table-2.csv")
+#print("TABLE 2: mean and standard deviation for each generation across all replicants combined.")
+#print(table2)
 
 # make plots
 for (replicant in 1:5) {
