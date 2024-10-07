@@ -9,7 +9,8 @@
 # - [x] Calcualte mean and sd for each datapoint 
 # - [x] Output to CSV file, format tables in excel 
 # - [x] Plot: time on the x-axis, citrate concentration [OD420] on the y-axis 
-
+# - [ ] Fix mean/sd table, group by replicant, not by generation!! 
+# - [ ] Plot mean and sd using error bars 
 
 # read in data from .csv file
 data <- read.csv("Data_Citrate_concentrations_reorganized.csv", header=TRUE, sep=",")
@@ -32,6 +33,12 @@ for (generation in Generations) {
     # add to table 
     table <- rbind(table, data.frame(Generation=generation, Replicant=replicant, mean=dpmean, stddev=dpsd))
   }
+  # get subset of table for this generation, plot mean & stddev of each replicant
+  genData <- subset(table, Generation==generation)
+  means <- genData[["mean"]]
+  sds <- genData[["stddev"]]
+  plot(means ~ genData[['Replicant']], ylim=c(0,400), pch=16, xlab="Group", ylab="Value", main="Title")
+  arrows(x0=1:5, y0=means-sds, y1=means+sds, angle=90, code=3, length=0.1)
 }
 
 # write table-1 to csv file
@@ -57,7 +64,7 @@ write.csv(table2, "plots/table-2.csv")
 # make plots
 for (replicant in 1:5) {
   # open png device
-  png(paste("plots/plot", 1, replicant, sep='-'), width=800, height=600)
+  png(paste(paste("plots/plot", 1, replicant, sep='-'), ".png", sep=""), width=800, height=600)
   
   genA = subset(data, repl == replicant & Gen == 'A')[['OD420']]
   genB = subset(data, repl == replicant & Gen == 'B')[['OD420']]
@@ -77,7 +84,7 @@ for (replicant in 1:5) {
 
 # make plot with OD420 averaged across all 5 replicants
 # open png device
-png("plots/plot-2", width=800, height=600)
+png("plots/plot-2.png", width=800, height=600)
 
 # Subset Gen A data across all replicants, group by time, calculate mean
 genA_data <- subset(data, Gen == 'A')
