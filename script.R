@@ -9,8 +9,8 @@
 # - [x] Calcualte mean and sd for each datapoint 
 # - [x] Output to CSV file, format tables in excel 
 # - [x] Plot: time on the x-axis, citrate concentration [OD420] on the y-axis 
-# - [ ] Fix mean/sd table, group by replicant, not by generation!! 
-# - [ ] Plot mean and sd using error bars 
+# - [x] Fix mean/sd table, group by replicant, not by generation!! 
+# - [x] Plot mean and sd using error bars 
 
 # read in data from .csv file
 data <- read.csv("Data_Citrate_concentrations_reorganized.csv", header=TRUE, sep=",")
@@ -24,8 +24,10 @@ table <- data.frame(Generation=character(), Replicant=numeric(), mean=numeric(),
 Generations <- list('A', 'B', 'C', 'D')
 
 # get mean and stddev for OD420 values of each generation in each replicant
-for (generation in Generations) {
-  for (replicant in 1:5) {
+# for (generation in Generations) {
+#  for (replicant in 1:5) {
+for (replicant in 1:5) {
+  for (generation in Generations) {
     OD420 = subset(data, repl == replicant & Gen == generation)[['OD420']]
     dpmean = mean(OD420)
     dpsd = sd(OD420)
@@ -34,11 +36,21 @@ for (generation in Generations) {
     table <- rbind(table, data.frame(Generation=generation, Replicant=replicant, mean=dpmean, stddev=dpsd))
   }
   # get subset of table for this generation, plot mean & stddev of each replicant
-  genData <- subset(table, Generation==generation)
-  means <- genData[["mean"]]
-  sds <- genData[["stddev"]]
-  plot(means ~ genData[['Replicant']], ylim=c(0,400), pch=16, xlab="Group", ylab="Value", main="Title")
-  arrows(x0=1:5, y0=means-sds, y1=means+sds, angle=90, code=3, length=0.1)
+  replData <- subset(table, Replicant==replicant)
+  means <- replData[["mean"]]
+  sds <- replData[["stddev"]]
+
+  # open png device
+  png(paste(paste("plots/plot", 3, replicant, sep='-'), ".png", sep=""), width=800, height=600)
+  
+  plot(1:4, means, ylim=c(0,400), xlim=c(0.5, 4.5), pch=16, xaxt="n", xlab="Generation", ylab="OD420", main=paste("Mean and sd for each Generation in Replicant ", replicant))
+  arrows(x0=1:4, y0=means-sds, y1=means+sds, angle=90, code=3, length=0.1)
+  axis(1, at=1:4, labels=c("A", "B", "C", "D"))
+  #plot(means ~ genData[['Replicant']], ylim=c(0,400), pch=16, xlab="Group", ylab="Value", main="Title")
+  #arrows(x0=1:5, y0=means-sds, y1=means+sds, angle=90, code=3, length=0.1)
+  
+  # close png device 
+  dev.off()
 }
 
 # write table-1 to csv file
@@ -56,6 +68,7 @@ for (generation in Generations) {
   dpsd = sd(datapoint) 
   table2 <- rbind(table2, data.frame(Generation=generation, mean=dpmean, stddev=dpsd))
 }
+
 
 write.csv(table2, "plots/table-2.csv")
 #print("TABLE 2: mean and standard deviation for each generation across all replicants combined.")
